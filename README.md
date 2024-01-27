@@ -1,6 +1,6 @@
 # Setting up **RDP** _and_ **SSH**
 
-### ( _via_ **Cloudflare Tunnels** on the **Free Plan** )
+## ( _via_ **Cloudflare Tunnels** on the **Free Plan** )
   
 - [Introduction](#introduction)
 - [Prerequisites](#prerequisites)
@@ -77,7 +77,7 @@ Follow these steps to download and prepare cloudflared on your machine:
 
 Next, we will get the tunnel started, which will allow us to later use our own rules, instead of the limiting dashboard that cloudflare offers.
 
-#### 1. Start the Login Process
+### 1. Start the Login Process
 
 - Open your terminal (Command Prompt, PowerShell, etc.) and enter cloudflared tunnel login. This command will prompt your web browser to open for you to log in to your Cloudflare account
 
@@ -149,7 +149,7 @@ Indentation is Key: Ensure proper indentation in the configuration file. The das
 #### 6. Create DNS Records
 
 - Log in to the Cloudflare dashboard and navigate to the DNS Rules page.
-- Set up CNAME records for each subdomain. For the target, use <GUID OF TUNNEL>.cfargotunnel.com.
+- Set up CNAME records for each subdomain. For the target, use `<GUID OF TUNNEL>.cfargotunnel.com`.
 This redirects traffic to your tunnel instead of your personal IP. Again, you can get this from the name of the .json file if you forget it.
 
 ```markdown
@@ -176,28 +176,28 @@ For both cases, you need the cloudflared.exe program on the client machine. You 
 
 This one was tricky and took me a while to figure out how to use. I read it in the documentation multiple times but how they have it made absolutely no sense to me. Before you try to connect to anything with RDP, you need to run the following command in a terminal window (and you need to run it each time before you RDP to these machines.) Under hostname put the subdomain you set up for RDP, and under URL leave it exactly as it is, unless your RDP is running on something other than the default port, in which case you would put that.
 
+```PowerShell
+cloudflared access rdp --hostname rdp.yourdomain.com --url rdp://localhost:3389  
 ```
-cloudflared access rdp --hostname rdp.yourdomain.com --url rdp://localhost:3389
-```
 
-When you execute this command, it should say "INF Start Websocket listener host=localhost:<your port>". Now, another unintuitive thing, you open the RDP client and then CONNECT TO LOCALHOST:3389.
+When you execute this command, it should say `INF Start Websocket listener host=localhost:<your port>`. Now, another unintuitive thing, you open the RDP client and then CONNECT TO LOCALHOST:3389.
 
-`That's right, you don't put the subdomain you set up, you don't put an IP address, you **RDP TO YOURSELF**!!`
+That's right, you don't put the subdomain you set up, you don't put an IP address, you RDP TO YOURSELF!!
 
-But due to the command we just ran, it redirects you automagically to the device you set up in the configuration file. If you set up Cloudflare Access for authentication, at this point it would open a browser window and prompt you to authenticate before making the  connection. And that's all there is to it! I was banging my head against the wall for weeks before I figured it out.
+But due to the command we just ran, it redirects you automagically to the device you set up in the configuration file. If you set up Cloudflare Access for authentication, at this point it would open a browser window and prompt you to authenticate before making the connection. And that's all there is to it! I was banging my head against the wall for weeks before I figured it out.
 
 ### SSH
 
- In order to get SSH to work, you must create a "config" file in your ".ssh" folder in your home directory (C\Users\<username>\.ssh). No extension, just create a text file named "config" and then erase the extension. You want to follow this format, substituting the host subdomain for whatever you named yours (NOTE: you do not need to name your SSH subdomain 'ssh', just for illustrative purposes), having the correctly formatted "service:" that your subdomain points to in the config.yml file on your server is the important part.
+In order to get SSH to work, you must create a "config" file in your ".ssh" folder in your home directory (C\Users\<username>\.ssh). No extension, just create a text file named "config" and then erase the extension. You want to follow this format, substituting the host subdomain for whatever you named yours (NOTE: you do not need to name your SSH subdomain 'ssh', just for illustrative purposes), having the correctly formatted "service:" that your subdomain points to in the config.yml file on your server is the important part.
 
-```
+```SSH
 Host ssh.yourdomain.com
   ProxyCommand "C:\Program Files (x86)\cloudflared\cloudflared.exe" access ssh --hostname %h
 ```
 
 You can add add additional entries such as this below if you have multiple subdomains pointing to SSH, for example if you have multiple devices and have a separate ssh subdomain set up for each.
 
-Now, to connect, you just connect as normal, for example "ssh <tsmith@ssh.yourdomain.com>" in any terminal.
+Now, to connect, you just connect as normal, for example "ssh <tsmith@ssh.yourdomain.com>" in any terminal.  
 
 ### TODO
 

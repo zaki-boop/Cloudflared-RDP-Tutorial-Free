@@ -1,0 +1,96 @@
+# Cloudflare Tunnel RDP (& SSH) Instructions
+
+## Introduction
+  
+  Welcome to this step-by-step guide on setting up RDP (Remote Desktop Protocol) access through Cloudflare's free tier. Contrary to some misconceptions, it is entirely possible to configure RDP under the free tier. This guide aims to demystify the process, providing clear and straightforward instructions to help you succeed where others may have encountered difficulties.
+
+To simplify the process further, I've included templates for the configuration files. These templates are designed for ease of use; you'll only need to paste your specific information into them. Additionally, I've prepared a few dedicated scripts to enhance your experience. These scripts include one for starting the tunnel effortlessly—eliminating the need to remember complex command-line arguments—and another that allows this starter script to run as a hidden background service via Task Scheduler. This ensures that the tunnel operates seamlessly in the background, without interfering with your regular computer use, such as when closing multiple open Chrome tabs.
+
+Many online resources, including forums and official documentation, can be challenging to navigate and understand. This guide cuts through the complexity, offering an easy-to-follow approach to setting up RDP and SSH by manually configuring your Cloudflare tunnels.
+
+Towards the end, we will also explore advanced topics such as automating the setup process and running it in the background without a visible window, enhancing both convenience and functionality.
+
+Prereqs:
+- Need a domain.
+- Must use Cloudflare as your DNS servers so you can get the ability to make tunnels.
+- Get to the point in their tutorials where you can make tunnels via dashboard, but then instead of doing that start following this guide instead.
+- Make a folder inside your home folder (C:\Users\<your username>) called ".cloudflared", yes, with the period at the beginning.
+
+Procedure:
+--Part 1: Get cloudflared.exe and set it up--
+
+1. Go to cloudflare/cloudflared GitHub and download the latest release, not the MSI installer, but the .exe file.
+2. Create a folder on the base of your C drive named Cloudflared. (C:\Cloudflared)
+3. Create a folder inside of that named bin. (C:\Cloudflared\bin)
+4. Paste the exe into there.
+5. Rename the file to take out all the junk so it's just "cloudflared.exe".
+6. Now we need to add this folder to our PATH.
+7. Go to environment variables page (type env into start menu and an option should pop up 'Edit the system environment variables', then click 'Environment Variables...' on the bottom right of the resulting window.
+8. Either under the top part (user variables) or the bottom part (I recommend this, System variables, just so you know that no matter how you run the service it will always be able to see it) find the "PATH" variable. Click it, then click 'Edit'. Hit new, and add the path we created before (C:\Cloudflared\bin). Hit ok to all windows.
+
+--Part 2: Create tunnel--
+1. Open terminal (cmd, PowerShell, etc) and type "cloudflared tunnel login". This should open up a browser window where you need to login to your Cloudflare account.
+2. Once you do so, you are supposed to be redirected to a page where you "Authorize Cloudflare Tunnel", but this redirection often bugs for me, and it brings me to my normal homepage. At this point I go back to the terminal window and Ctrl+Click the link it gave me again, the one it gave when we ran the login command. And now that I'm logged in, it immediately brings me to the correct page where you Authorize the tunnel.
+3. Click the domain you want to use when accessing your tunnels, and hit Authorize. Don't worry, you can add a seemingly unlimited number of subdomains to this later.
+4. This process downloads a cert.pem file inside of the .cloudflared folder we created earlier in your user home directory.
+5. Navigate to this folder either through the terminal or if using GUI right clicking inside of th folder and choosing "Open Terminal here" or PowerShell or whatever you're using.
+6. Now type "cloudflared tunnel create <choose a name>. This will use the cert.pm inside of the current directory you are in to authorize you, and it will register (not start, big difference) a tunnel using the name you provided. Additionally it will assign it a GUID, which looks like a bunch of random numbers, letters, and dashes. Additionally, it will download a second file into the .cloudflared folder, named <the GUID>.JSON. This is the file we truly need in order to authenticate us to actually run the tunnel.
+
+--Part 3: Configuring the tunnel, the "server" and creating subdomains for your standard services--
+
+1. Look at my template at the GitHub link below. Download it to your computer and open in Notepad++ or your favorite text editor.
+2. Change the tunnel: parameter to the GUID it assigned to your tunnel. Easy way to get this is to pretend you're renaming the .json file, but then just copying the ID. Make sure not to copy the extension or the ".", just the ID itself.
+3. Add in the same GUID into the credential-file: parameter, this time the result will be the full path of the .json file.
+4. Below the credential-file parameter is where you would put any options you want to apply to everything after this, such as "noTLSverify" or whatnot.
+5. Now decide on what subdomains you want, such as "plex.yourdomain.com" or "RDP.yourdomain.com", etc.
+6. Once you figure it out, use the blocks provided as templates but change the hostname to your subdomains, and under service put the local hostname or IP address and port of the service you want accessible through the tunnel.
+
+NOTE: You can choose to do a subdomain per service, or you can do a wildcard subdomain if you want to use a reverse proxy. If you use a wildcard, you must put the URL in quotes or it will error out, ex. "*.yourdomain.com".
+
+NOTe: Make sure to keep the indenting the same. "- hostname:" is two spaces from the edge of the document, "service:" is two spaces indented from that for a total of 4 from the edge. Copy and pasting often messes it up for me, but super easy to correct as long as you notice.
+6. de.
+
+6. For MOST SERVICES: after service: you want to put the local address you would go to to reach it, like http://192.168.1.10:80. For SSH: you would put ssh://<ip of device you want to connect to>:22 (or whatever port you have SSH set up for). For RDP: you would put rdp://<ip of device you want to connect to>:3389 (or whatever port you have RDP set up for).
+7. Once you have these setup to your liking, you need to login to the cloudflare dashboard. Once there, navigate to the DNS Rules page. Here, you need to set up CNAME records for every subdomain. To do this you want to click new rule, change the type to CNAME, then enter JUST the subdomain part of the URL into the box. For example, if you wanted to create a record for "rdp.yourdomain.com" you would just put "rdp" into the box. For the target, you want to put <GUID OF TUNNEL>.cfargotunnel.com. This is the unique address of your tunnel, so instead of seeing your personal IP address, anyone accessing your services would only see this. Now at this point for standard HTTP/S services, you're done. Let's say if you had a heimdall service running and set up a subdomain for it, at this point you xould go navigate to "heimdall.yourdomain.com" on the open internet and access it as if you were on the local network from anywhere in the world.
+
+HOWEVER, RDP AND SSH BOTH HAVE SPECIAL ADDITIONAL STEPS TO TAKE ON THE CLIENT MACHINE BEFORE YOU ATTEMPT TO CONNECT.
+
+For both cases, you need the cloudflared.exe program on the client machine. You DO NOT need to install anything, eg. the MSI version, or install as a service, or anything like that. Just download the .exe and put it into a folder. For consistency and ease of use, I would suggest to make a C:\Cloudflared\bin folder on your client machine(s) and add it to the PATH as well, but it's up to you.
+
+RDP: This one was tricky and took me a while to figure out how to use. I read it in the documentation multiple times but how they have it made absolutely no sense to me. Before you try to connect to anything with RDP, you need to run the following command in a terminal window (and you need to run it each time before you RDP to these machines.) Under hostname put the subdomain you set up for RDP, and under URL leave it exactly as it is, unless your RDP is running on something other than the default port, in which case you would put that.
+
+```
+cloudflared access rdp --hostname rdp.yourdomain.com --url rdp://localhost:3389
+```
+
+When you execute this command, it should say "INF Start Websocket listener host=localhost:<your port>". Now, another unintuitive thing, you open the RDP client and then CONNECT TO LOCALHOST:3389. That's right, you don't put the subdomain you set up, you don't put an IP address, you RDP TO YOURSELF, but due to the command we just ran, it redirects you automagically to the device you set up in the configuration file. If you set up Cloudflare Access for authentication, at this point it would open a browser window and prompt you to authenticate before making the  connection. And that's all there is to it! I was banging my head against the wall for weeks before I figured it out.
+
+SSH: In order to get SSH to work, you must create a "config" file in your ".ssh" folder in your home directory (C\Users\<username>\.ssh). No extension, just create a text file named "config" and then erase the extension. You want to follow this format, substituting the host subdomain for whatever you named yours (NOTE: you do not need to name your SSH subdomain 'ssh', just for illustrative purposes), having the correctly formatted "service:" that your subdomain points to in the config.yml file on your server is the important part.
+
+```
+Host ssh.yourdomain.com
+  ProxyCommand "C:\Program Files (x86)\cloudflared\cloudflared.exe" access ssh --hostname %h
+```
+You can add add additional entries such as this below if you have multiple subdomains pointing to SSH, for example if you have multiple devices and have a separate ssh subdomain set up for each.
+
+Now, to connect, you just connect as normal, for example "ssh tsmith@ssh.yourdomain.com",
+
+--Part 4 Automation--
+
+Option 1 TUNNEL AUTOSTART SCRIPT:
+
+I originally wrote a .bat or a .ps1 script to run the tunnel, and then ran a task scheduler to execute on login. This can be useful if you need additional parameters in the 'cloudflared tunnel run command', such as:
+
+	- if you put your config.yml file anywhere but the .cloudflared folder, you could specify where to find it via '--config "<path>" '
+	- bind to a specific IP address using ' --edge-bind-address '
+	- etc. 
+
+However, this results in a window always staying open showing the live logs from the tunnel. I will admit that it was much easier diagnosing issues this way, or seeing visually when it wasn't working (lots of red text appears), but it gets annoying constantly having a terminal window open, or accidentally closing it and cutting off access.
+
+Options 2 TUNNEL AUTOSTART SERVICE:
+
+I discovered recently, after avoiding the service installation for a while due to needing special parameters as mentioned above, that as long as you keep the <GUID>.json file and your config.yml file in the .cloudflared folder in your home directory, you can just run "cloudflared service install" at this point, and it will look in that folder for the configurations automatically. I will still provide a link to the script file in case anyone would prefer not to install as a service. Additionally, you can go into the registry to edit various service parameters.
+
+IF YOU WOULD LIKE TO BE ABLE
+
+
