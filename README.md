@@ -28,12 +28,13 @@
 
 ## Introduction
 
-**Welcome** to this step-by-step guide on setting up **RDP (Remote Desktop Protocol)** and SSH **(Secure Shell)** access through Cloudflare's free tier. I dedicated an enourmous amount of time trying to figure it out, even sometimes thinking it was impossible, but I never gave up... _and I finally did it._ Contrary to some misconceptions, it is entirely possible to configure RDP under the free tier. This guide aims to demystify the process, providing clear and straightforward instructions to help you succeed where others (and myself) may have encountered difficulties. To note, I am using a Windows computer to do all of this, but I imagine it would be pretty much the same from any platform, as the only parts on our machine that we configure  are .yaml files.
+**Welcome** to this step-by-step guide on setting up **RDP (Remote Desktop Protocol)** and SSH **(Secure Shell)** access through Cloudflare's free tier. I dedicated an enourmous amount of time trying to figure it out, even sometimes thinking it was impossible, but I never gave up... _and I finally did it._ Contrary to some misconceptions, it is entirely possible to configure RDP under the free tier. This guide aims to demystify the process, providing clear and straightforward instructions to help you succeed where others (and myself) may have encountered difficulties. This guide was written for Windows, but I imagine it would be pretty much the same setup on any platform, as the only parts of our tunnel that we configure are the config.yaml files, so the folder structure should be the only difference.
 
-To simplify the process further, I've included templates for the configuration file, in addition to some simple scripts. These templates are designed for ease of use; you'll only need to paste your specific information into them, such as your domain and hostname information, (for example . Additionally, I've prepared a few dedicated scripts to enhance your experience. These scripts include one for starting the tunnel effortlessly—eliminating the need to remember complex command-line arguments—and another that allows this starter script to run as a hidden background service via Task Scheduler. This ensures that the tunnel operates seamlessly in the background, without interfering with your regular computer use, such as when closing multiple open Chrome tabs.
+#### Key Feature: Templates
+
+To simplify the process further, I've included templates for the configuration file, in addition to some simple automation scripts to enhance and simplify your experience. These templates are designed for ease of use; you'll only need to paste your specific information into them, such as your tunnel ID, domain, and hostname information. The scripts include one for starting the tunnel effortlessly—eliminating the need to remember complex command-line arguments—and another that allows this starter script to run as a hidden background service via Task Scheduler. This ensures that the tunnel operates seamlessly in the background, without interfering with your regular computer use, such as when closing multiple open Chrome tabs.
 
 Many online resources, including forums and official documentation, can be challenging to navigate and understand. This guide cuts through the complexity, offering an easy-to-follow approach to setting up RDP and SSH by manually configuring your Cloudflare tunnels.
-Towards the end, we will also explore advanced topics such as automating the setup process and running it in the background without a visible window, enhancing both convenience and functionality
 
 ## Prerequisites
 
@@ -43,9 +44,9 @@ In order to successfully set up RDP/SSH access through Cloudflare tunnels, there
 
    2. Use Cloudflare for DNS: Ensure that your domain, whether free or owned, uses Cloudflare as its DNS provider. This enables the creation of tunnels through Cloudflare's network.
 
-   3. Get started with Cloudflare Tunnels: It's beneficial to reach the point in Cloudflare's tutorials where you're able to create tunnels via their dashboard. Once you're comfortable with this, switch to this guide for a more detailed and manual setup process.
+   3. Create a Dedicated Folder: On your local machine, make a folder in your home directory \n (C:\\Users\\\<your username>) named '.cloudflared' (including the period at the beginning). This folder will be used for storing configuration files and other necessary data for the Cloudflare tunnels.
 
-   4. Create a Dedicated Folder: On your local machine, make a folder in your home directory \n (C:\\Users\\\<your username>) named '.cloudflared' (including the period at the beginning). This folder will be used for storing configuration files and other necessary data for the Cloudflare tunnels."
+   4. (Recommended) Get started with Cloudflare Tunnels: It's beneficial to reach the point in Cloudflare's own tutorials where you're able to create tunnels via their dashboard. Once you're comfortable with this, switch to this guide for a more detailed and manual setup process.
 
 ## Procedure
 
