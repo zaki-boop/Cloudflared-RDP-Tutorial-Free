@@ -2,7 +2,9 @@ Enter this command into Powershell, Command Prompt, Terminal, etc. Or better yet
 
 #### LEAVE LOCALHOST AS LOCALHOST!
 
-
+```PowerShell
+cloudflared access rdp --hostname rdp.example.com --url rdp://localhost:3390
+```
 
 SUBSTITUTE your sub/domain for rdp.example.com, but LEAVE LOCALHOST AS LOCALHOST!
 
