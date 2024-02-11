@@ -1,4 +1,8 @@
-Enter this into Powershell, Command Prompt, Terminal, etc.
+Enter this command into Powershell, Command Prompt, Terminal, etc. Or better yet, put this command into a .ps1 file and run directly in PowerShell. 
+
+#### LEAVE LOCALHOST AS LOCALHOST!
+
+
 
 SUBSTITUTE your sub/domain for rdp.example.com, but LEAVE LOCALHOST AS LOCALHOST!
 
