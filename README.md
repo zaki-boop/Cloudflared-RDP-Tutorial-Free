@@ -28,7 +28,9 @@
 
 ## Introduction
 
-**Welcome** to this step-by-step guide on setting up **RDP (Remote Desktop Protocol)** and SSH **(Secure Shell)** access through Cloudflare's free tier. I dedicated an enourmous amount of time trying to figure it out, even sometimes thinking it was impossible, but I never gave up... _and I finally did it._ Contrary to some misconceptions, it is entirely possible to configure RDP under the free tier. This guide aims to demystify the process, providing clear and straightforward instructions to help you succeed where others (and myself) may have encountered difficulties. This guide was written for Windows, but I imagine it would be pretty much the same setup on any platform, as the only parts of our tunnel that we configure are the config.yaml files, so the folder structure should be the only difference.
+**Welcome** to this step-by-step guide on setting up **RDP (Remote Desktop Protocol)** and SSH **(Secure Shell)** access through Cloudflare's free tier. I dedicated an enourmous amount of time trying to figure it out, even sometimes thinking it was impossible, but I never gave up... _and I finally did it._ Contrary to some misconceptions, it is entirely possible to configure RDP under the free tier. This guide aims to demystify the process, providing clear and straightforward instructions to help you succeed where others (and myself) may have encountered difficulties. This guide was written for Windows, but I imagine it would be pretty much the same setup on any platform, as the only parts of our tunnel that we configure are the config.yaml files, so the folder structure should be the only difference.  
+
+If anyone would like to help improve the readability, structure, or anything else in this guide, please create a pull request. Any questions at all, feel free to message me, or create a discussion or somesuch. 
 
 #### Key Feature: Templates
 
@@ -198,9 +200,9 @@ Host ssh.yourdomain.com
 
 You can add add additional entries such as this below if you have multiple subdomains pointing to SSH, for example if you have multiple devices and have a separate ssh subdomain set up for each.
 
-Now, to connect, you just connect as normal, for example "ssh <tsmith@ssh.yourdomain.com>" in any terminal.  
+Now, to connect, you just connect as normal, for example "ssh tsmith@ssh.yourdomain.com" in any terminal.  
 
 ### TODO
 
-  [ ] Upload Templates
+  [X] Upload Templates
   [ ] Edit Final Section to Match Formatting
